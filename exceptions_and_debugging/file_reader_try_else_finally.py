@@ -124,3 +124,80 @@ Explanation:
 =================================================
 
 """
+import os
+
+# --- Setup: Creating temporary test files so you have something to read! ---
+with open("numbers.txt", "w") as f:
+    f.write("10\n20\n30\n")
+
+with open("bad.txt", "w") as f:
+    f.write("10\nabc\n30\n")
+# -------------------------------------------------------------------------
+
+def read_numbers(path):
+    """
+    Reads numbers from a file, demonstrating the full try/except/else/finally structure.
+    """
+    lines_read = 0
+    total_sum = 0.0
+    
+    try:
+        with open(path, 'r') as f:
+            for line in f:
+                cleaned_line = line.strip()
+                if cleaned_line:
+                    number = float(cleaned_line)
+                    total_sum += number
+                    lines_read += 1
+                    
+    except FileNotFoundError:
+        return ("error", f"File not found: {path}", lines_read)
+        
+    except PermissionError:
+        return ("error", f"Permission denied to read: {path}", lines_read)
+        
+    except ValueError:
+        return ("error", "Invalid number on a line", lines_read)
+        
+    except Exception as e:
+        return ("error", f"Unexpected error: {str(e)}", lines_read)
+        
+    else:
+        return ("ok", total_sum, lines_read)
+        
+    finally:
+        # I updated this print statement so you can see exactly when the finally block triggers
+        print(f"[System: Finished attempting to read '{path}']")
+
+
+# --- Interactive User Input ---
+
+print("=== Welcome to the Safe File Reader ===")
+print("Available test files: 'numbers.txt', 'bad.txt', or type 'missing.txt' to see it fail.")
+print("Type 'q' to quit at any time.\n")
+
+while True:
+    # Ask the user for a filename
+    user_file = input("Enter the name of the file to read: ")
+    
+    # Escape hatch
+    if user_file.lower() == 'q':
+        print("Closing file reader...")
+        break
+        
+    # Run the function and unpack all THREE items from the tuple
+    status, message, lines = read_numbers(user_file)
+    
+    # Print the formatted result based on the status
+    if status == "ok":
+        print(f"✅ SUCCESS: The total sum is {message}")
+        print(f"   (Successfully read {lines} valid lines)")
+    else:
+        print(f"❌ ERROR: {message}")
+        print(f"   (Failed after reading {lines} valid lines)")
+        
+    print("-" * 45 + "\n")
+
+# --- Cleanup: Removing the temporary files when the program ends ---
+if os.path.exists("numbers.txt"): os.remove("numbers.txt")
+if os.path.exists("bad.txt"): os.remove("bad.txt")

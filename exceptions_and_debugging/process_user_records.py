@@ -137,3 +137,83 @@ Explanation:
 =================================================
 
 """
+
+def process_records(records):
+    """
+    Processes a list of raw dictionaries, cleaning the data and logging any errors.
+    """
+    clean_records = []
+    error_log = []
+
+    # Iterate through the list with an index counter
+    for index, record in enumerate(records):
+        try:
+            # Attempt to access keys (raises KeyError if missing, TypeError if record isn't a dict)
+            name = record["name"]
+            age_str = record["age"]
+            score_str = record["score"]
+
+            # Attempt to convert types (raises ValueError if strings aren't numbers)
+            age = int(age_str)
+            score = float(score_str)
+
+        # Technique 1 & 2: Catching multiple errors at once AND inspecting the error object (e)
+        except (KeyError, TypeError) as e:
+            error_class = type(e).__name__
+            error_log.append((index, error_class, str(e)))
+
+        # Catching the conversion error separately
+        except ValueError as e:
+            error_class = type(e).__name__
+            error_log.append((index, error_class, str(e)))
+
+        # Technique 4: The 'else' block
+        # This ONLY runs if the 'try' block finished perfectly without triggering any exceptions
+        else:
+            clean_records.append({"name": name, "age": age, "score": score})
+
+    return clean_records, error_log
+
+
+def process_strict(records):
+    """
+    Calls process_records, but acts strictly by throwing a fatal error if ANY records failed.
+    """
+    clean_records, error_log = process_records(records)
+    
+    # Technique 3: Re-raising a fatal error if the log is not empty
+    if len(error_log) > 0:
+        # We explicitly raise a RuntimeError, detailing the number of failures
+        raise RuntimeError(f"{len(error_log)} record(s) failed to process")
+        
+    return clean_records
+
+
+# --- Testing the Functions ---
+
+records_list = [
+    {"name": "Alice", "age": "25",   "score": "88.5"},
+    {"name": "Bob",   "age": "abc",  "score": "70"},          # ValueError: "abc" is not an int
+    {"name": "Carol", "age": "30"},                           # KeyError: missing "score"
+    "not a dict",                                             # TypeError: string indices must be integers
+    {"name": "Dan",   "age": "40",   "score": "55.5"},
+]
+
+# 1. Test standard processing
+clean_res, errors = process_records(records_list)
+
+print("Clean Records:")
+for rec in clean_res:
+    print(f"  {rec}")
+
+print("\nError Log:")
+for err in errors:
+    print(f"  {err}")
+
+print("\n" + "-"*40 + "\n")
+
+# 2. Test strict processing
+try:
+    process_strict(records_list)
+except RuntimeError as e:
+    print(f"Strict mode raised: {type(e).__name__}: {str(e)}")

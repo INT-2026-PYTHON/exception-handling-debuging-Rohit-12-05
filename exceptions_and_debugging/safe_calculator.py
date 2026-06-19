@@ -63,3 +63,51 @@ Calculation finished
 =================================================
 
 """
+
+def safe_divide(a, b):
+    """
+    Attempts to divide two values, gracefully catching crashes and returning a status tuple.
+    """
+    try:
+        num_a = float(a)
+        num_b = float(b)
+        result = num_a / num_b
+        return ("ok", result)
+        
+    except ValueError:
+        return ("error", "Inputs must be numbers")
+        
+    except ZeroDivisionError:
+        return ("error", "Cannot divide by zero")
+        
+    except Exception as e:
+        return ("error", f"An unexpected error occurred: {e}")
+
+print("=== Welcome to the Safe Calculator ===")
+print("Type 'q' to quit at any time.\n")
+
+while True:
+    # 1. Get the first number
+    first_input = input("Enter the first number: ")
+    if first_input.lower() == 'q':
+        print("Closing calculator...")
+        break
+        
+    # 2. Get the second number
+    second_input = input("Enter the number to divide by: ")
+    if second_input.lower() == 'q':
+        print("Closing calculator...")
+        break
+        
+    # 3. Run the safe_divide function
+    # unpack the returned tuple directly into two variables: status and message
+    status, message = safe_divide(first_input, second_input)
+    
+    # 4. Print the formatted result
+    print(f"\nStatus: {status.upper()}")
+    if status == "ok":
+        print(f"Answer: {message}")
+    else:
+        print(f"Reason: {message}")
+        
+    print("-" * 35 + "\n")

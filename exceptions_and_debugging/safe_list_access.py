@@ -77,3 +77,40 @@ Output Example 3:
 =================================================
 
 """
+
+def safe_get(items, index):
+    """
+    Attempts to retrieve a value from a list at a specific index, 
+    gracefully handling out-of-bounds or invalid index types.
+    """
+    try:
+        # We go straight for the retrieval. If it fails, Python jumps to the except blocks.
+        value = items[index]
+        return ("ok", value)
+        
+    except IndexError:
+        # Caught the error when the index is a number, but too large/small for the list
+        return ("error", "Index out of range")
+        
+    except TypeError:
+        # Caught the error when the index isn't an integer (like a string or float)
+        return ("error", "Index must be an int")
+        
+    except Exception as e:
+        # Catch-all for any other weird bugs we didn't foresee
+        return ("error", f"Unexpected error: {str(e)}")
+
+
+# --- Testing the Function ---
+
+print("Input Example 1:")
+result1 = safe_get([10, 20, 30, 40], 2)
+print(result1)
+
+print("\nInput Example 2:")
+result2 = safe_get([10, 20, 30], 7)
+print(result2)
+
+print("\nInput Example 3:")
+result3 = safe_get([10, 20, 30], "1")
+print(result3)
